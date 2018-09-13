@@ -1,0 +1,193 @@
+#ifndef _VECTOR1_H_
+#define _VECTOR1_H_
+
+#include <cstring>
+
+template<typename t>
+
+class vector
+{
+private:
+	t* buff;
+	int len;//当前长度
+	int cap;//当前容量
+	
+	enum{size_l = 10};
+	
+public:
+	vector()
+	{
+		len = 0;
+		cap = 100;
+		buff = new t[cap];
+	}
+	~vector()
+	{
+		delete []buff;
+		len = 0;
+		cap = 0;
+	}
+	//尾插
+	void push_back(const t& data)
+	{
+		if(len == cap)
+		{
+			//扩容
+			cap += size_l;
+			t* p = new t[cap];
+			memcpy(p,buff,len*sizeof(t));
+			delete []buff;
+			buff = p;	
+		}
+		buff[len++] = data;
+	}
+	//头插
+	void push_front(const t& data)
+	{
+		if(len == cap)
+		{
+			cap += size;
+			t* p = new t[cap];
+			memcpy(p,buff,len*sizeof(t));
+			delete []buff;		
+			buff = p;
+		}
+
+		int i;
+		for(i = len -1; i>= 0;--i)
+		{
+			buff[i+ 1] = buff[i];
+		}
+		buff[0] =data;
+		++len;
+	}
+	//中间插
+	void insert(int pos,const t& data)
+	{
+		if(pos > cap) pos = cap;
+		if(pos < 0) pos = 0; 
+		if(len == cap)
+		{
+			cap += size;
+			t* p = new t[cap];
+			memcpy(p,buff,len*sizeof(t));
+			delete []buff;		
+			buff = p;
+		}
+
+		int i;
+		for(i = len -1; i>= pos;--i)
+		{
+			buff[i+ 1] = buff[i];
+		}
+		buff[0] =data;
+		++len;
+	}
+	
+	//清空
+	void clear(void)
+	{
+		len = 0;
+	}
+
+	//删除
+	bool remove(const t& data)
+	{
+		if(cap > len * 3)
+		{
+			//减容
+			cap = len * 2;
+			t* p = new t[cap];
+			mencpy(p,buff,len*sizeof(t));
+			delete []buff;
+			buff = p;
+		}
+		int i;
+		for(i = 0;i < len;++i)
+		{
+			if(buff[i] == data)break;
+		}
+		if(i == len) return false;
+		
+		for(i =0; i < len;++i)
+		{
+			buff[i] = buff[i+ 1];
+		}
+		--len;
+	}
+	//随机访问
+	t& operator[](int i)const
+	{
+		if(i < 0 || i >= len) throw 1;
+		return buff[i];
+	}
+	t& find(const t& data) const
+	{
+		int i;
+		for(i = 0;i < len;++i)
+		{
+			if(buff[i] == data) return buff[i];
+		}
+		throw 2;
+	}
+	//判空
+	bool empty(void) const 
+	{
+		return !len;
+	}
+	//获取长度
+	int size(void) const
+	{
+		return len;
+	}
+	//排序
+private:
+	void sort(t* buff,int len, bool(*comp)(const t& a, const t& b))
+	{
+		int i = 0 ,j = len - 1;
+		int k = buff[i];
+		while(i != j)
+		{
+			if(len < 2) break;
+			while(i != j && comp(buff[j], k)) j--;
+
+				buff[i] = buff[j];
+			while(i != j && comp(buff[i], k)) j++;
+
+				buff[i] = buff[j];
+		}
+		buff[i] = k;
+		
+		sort(buff,i,comp);
+		sort(buff + i + 1,len - i - 1,comp);
+	}
+public:
+	void sort(bool(*comp)(const t& a, const t& b))
+		{
+			sort(buff,len,comp);							}
+	//逆序
+	void reverse(void)
+	{
+		int i;
+		t tmp;
+		for(i = 0;i < len;++i)
+		{
+			tmp = buff[i];
+			buff[i] = buff[len -i -1];
+			buff[len - i - 1] = tmp;
+		}
+	}	
+	//顺序表连接
+	vector operator+(const vector& v)
+	{
+		vector temp;
+		delete []temp.buff;
+		temp.cap = this->size() + v.size();
+		temp.len = temp.cap;
+		temp.buff = new t[temp.cap];
+		memcpy(temp,this->buff,this->len*sizeof(t));
+		memcpy(temp + len,v.buff,v.len*sizeof(t));
+	}
+};
+
+#endif
